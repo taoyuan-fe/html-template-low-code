@@ -1,5 +1,5 @@
 <template>
-  <el-form ref="ruleFormRef" :model="form" :rules="rules" label-width="120px">
+  <el-form ref="ruleFormRef" :model="form" :rules="rules" label-width="60px">
     <el-form-item label="行" prop="row">
       <el-input-number v-model="form.row" :min="1" :max="20" />
     </el-form-item>
@@ -18,7 +18,7 @@ import type { FormInstance, FormRules } from "element-plus";
 const dialogFormVisible = ref(false);
 const ruleFormRef = ref<FormInstance>(); // 组件校验项
 const form = reactive({
-  row: 5,
+  row: 6,
   column: 5,
 });
 const emits = defineEmits(["createTable"]);
@@ -30,7 +30,6 @@ const check = (rule: any, value: any, callback: any) => {
   if (!Number.isInteger(value)) {
     callback(new Error("请输入正确值"));
   } else {
-    console.log(value)
     if (value < 0) {
       callback(new Error("请输入正确值"));
     } else {
@@ -47,10 +46,7 @@ const submitForm = async () => {
   if (!ruleFormRef) return;
   await ruleFormRef.value.validate((valid, fields) => {
     if (valid) {
-      console.log(valid)
       emits("createTable", form.row, form.column);
-    } else {
-      console.log("error submit!", fields);
     }
   });
 };

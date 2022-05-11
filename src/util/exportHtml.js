@@ -5,6 +5,8 @@ function getHtml(code) {
   let template = code;
   template = template.replaceAll(/\<!--(.*?)-->/g, ""); // 去除注释
   template = template.replaceAll(/data-(.*?)=""/g, ""); // 去除 data-数据
+  template = template.replaceAll(/row-active/g, ""); // 去除 data-数据
+  template = template.replaceAll(/table-focus/g, ""); // 去除 data-数据
   let html = 
   `<!DOCTYPE html>
   <html lang="en">
