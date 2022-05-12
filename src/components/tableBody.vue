@@ -2,19 +2,25 @@
   <!-- 遮罩层 -->
   <div
     class="mask"
+    v-if="positionList.is_show_mask"
     :style="'width:' + mask_width + 'left:' + mask_left + 'height:' + mask_height + 'top:' + mask_top"
   ></div>
   <el-aside class="aside">
     <el-card>
       <template #header> 表单操作 </template>
-      <form-table @createTable="createdTable" />
-      <el-button @click="merge" type="primary">合并单元格</el-button>
-      <el-button @click="export2Excel" type="primary">导出Html</el-button>
+      <form-table @createTable="createdTable" @merge="merge" @exportHtml="exportHtml"/>
     </el-card>
   </el-aside>
   <el-main class="content-box" @click="clear" @mousedown="handleMouseDown">
     <div class="content">
-      <table ref="table" border="1" cellspacing="0" cellpadding="0" class="easy">
+      <table
+        ref="table"
+        border="1"
+        cellspacing="0"
+        cellpadding="0"
+        class="table-box"
+        :class="{ hideSelect: positionList.is_show_mask }"
+      >
         <!-- 标签用于对表格中的列进行组合，以便对其进行格式化 -->
         <colgroup>
           <col v-for="(item, index) in colgroup" :key="index" :width="item.width" />
@@ -24,6 +30,10 @@
             <template v-for="(subItem, subIndex) in item" :key="subIndex">
               <td
                 @click.stop="chooseTd(subItem)"
+                v-mouse-menu="{
+                  params: { row: index, column: subIndex },
+                  ...menuOptions,
+                }"
                 :colspan="subItem.colSpan"
                 :rowspan="subItem.rowSpan"
                 :id="subItem.id"
@@ -46,20 +56,21 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, toRefs } from "vue";
+import { ref, onMounted } from "vue";
 import FormTable from "./createTable.vue"; // 生成表单form表单
 import StyleForm from "./styleForm.vue"; // 样式修改
 import { TdOption, ColgroupModule } from "@/interface/TdModule"; // 样式表
 
 // hook 拖拽框
 import maskHook from "@/hook/mask";
-// 导出html文件
+// Hook 导出html文件
 import exportHtmlHook from "@/hook/exportHtml";
+// 鼠标右键菜单行为
+import { MouseMenuDirective } from "@howdyjs/mouse-menu";
 
-directives: {
-}
 // 拖拽框架 Hook 解构
 const {
+  positionList, //
   mask_width, // 拖拽框宽度
   mask_height, // 拖拽框高度
   mask_left, // 拖拽框左边
@@ -77,6 +88,47 @@ const colgroup = ref<ColgroupModule[]>([]); // 标签用于对表格中的列进
 const tDOption = ref<TdOption>(new TdOption()); // 当前选中的表单样式-和属性
 const table = ref<any>(null); // table的Ref
 
+const vMouseMenu: any = MouseMenuDirective; // 自定义指令
+
+const menuOptions = {
+  menuList: [
+    {
+      label: "左侧插入行",
+      tips: "Edit",
+      fn: (params: { column: number }) => {
+        const index = params.column - 1 < 0 ? 0 : params.column - 1;
+        addColumn(index);
+      },
+    },
+    {
+      label: "右侧插入行",
+      tips: "Stop",
+      fn: (params: { column: number }) => {
+        addColumn(params.column + 1);
+      },
+    },
+    {
+      label: "上方插入行",
+      tips: "Delete",
+      fn: (params: { row: number }) => {
+        const index = params.row - 1 < 0 ? 0 : params.row - 1;
+        addRow(index);
+      },
+    },
+    {
+      label: "下方插入行",
+      tips: "Delete",
+      fn: (params: { row: number }) => {
+        addRow(params.row + 1);
+      },
+    },
+  ],
+  menuWrapperCss: {
+    background: "#fff",
+    borderRadius: "10px",
+  },
+};
+
 onMounted(() => {
   createdTable(6, 5);
 });
@@ -84,10 +136,8 @@ onMounted(() => {
 // 清空
 const clear = () => {
   tDOption.value = new TdOption(); // 清空当前选中项
-  // keyList.value = []; // 选中范围
 };
 // 创建新表单数据
-// 创建 3行 2列的表格
 const createdTable = (row: number, column: number) => {
   clear();
   if (!row && !column) {
@@ -100,6 +150,7 @@ const createdTable = (row: number, column: number) => {
     .fill(0)
     .map((item, index) => {
       const res = [];
+      // 列的标志
       for (let columnIndex = 0; columnIndex < column; columnIndex++) {
         res.push(new TdOption(index, columnIndex));
       }
@@ -141,7 +192,8 @@ const merge = () => {
   resSetXY();
 };
 
-function export2Excel() {
+// 导出html
+const exportHtml = () => {
   if (!table!.value) {
     return;
   }
@@ -156,10 +208,50 @@ function export2Excel() {
   a.download = "模板.html";
   a.click();
   window.URL.revokeObjectURL(url);
-}
+};
+// 添加行
+const addRow = (index: number) => {
+  // 插入行的话，我们首先需要知道 每一行有几列
+  const columnLength = tableData.value[0].length;
+  const res = [];
+  for (let columnIndex = 0; columnIndex < columnLength; columnIndex++) {
+    res.push(new TdOption(index, columnIndex));
+  }
+  tableData.value.splice(index, 0, res);
+  // 插入完毕之后
+  // 然后我们需要逐一进行id的更新
+  // 之后我们需要对后面的每一列的id进行更新
+  const rowLength = tableData.value.length;
+  for (let rowIndex = index + 1; rowIndex < rowLength; rowIndex++) {
+    tableData.value[rowIndex].forEach((column, columnIndex) => {
+      column.resetId(rowIndex, columnIndex);
+    });
+  }
+};
+// 添加列
+const addColumn = (index: number) => {
+  // 先确定行的长度
+  const rowLength = tableData.value.length;
+  for (let rowIndex = 0; rowIndex < rowLength; rowIndex++) {
+    // 先进性添加
+    tableData.value[rowIndex].splice(index, 0, new TdOption(rowIndex, index));
+    const columnLength = tableData.value[0].length;
+    // 然后对之后的内容进行修改
+    for (let columnIndex = index + 1; columnIndex < columnLength; columnIndex++) {
+      tableData.value[rowIndex][columnIndex].resetId(rowIndex, columnIndex);
+    }
+  }
+  // 重置一下选中项
+  resSetXY();
+};
 </script>
 
 <style lang="scss" scoped>
+.hideSelect {
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10+ and Edge */
+  user-select: none; /* Standard syntax */
+}
 .aside {
   padding: 10px;
   height: auto;
@@ -175,16 +267,16 @@ function export2Excel() {
   display: flex;
   justify-content: center;
 }
-.easy {
+.table-box {
   width: 100%;
   margin: 0;
   border-collapse: collapse;
   border-spacing: 0;
+  z-index: 1;
+  opacity: 0.8;
 }
 .mask {
   position: absolute;
   background: #409eff;
-  z-index: 1;
-  opacity: 0.4;
 }
 </style>

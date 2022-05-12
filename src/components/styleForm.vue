@@ -1,5 +1,5 @@
 <template>
-  <el-form :model="form" label-width="80px">
+  <el-form :model="form" label-width="90px">
     <el-form-item label="单元格内容">
       <el-input v-model="form.value" />
     </el-form-item>

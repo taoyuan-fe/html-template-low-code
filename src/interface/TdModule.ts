@@ -21,6 +21,10 @@ export class TdOption extends TdStyleModule {
       this.id = `${index}-${columnIndex}`;
     }
   }
+  // 重置Id
+  resetId(index: number, columnIndex: number) {
+    this.id = `${index}-${columnIndex}`;
+  }
 }
 
 export interface ColgroupModule {

@@ -3,6 +3,7 @@ import { DomItem, DOMRect } from "@/interface/DOMRect";
 export default function () {
   // 遮罩层宽度+位置
   const positionList = reactive({
+    is_show_mask: false,
     start_x: 0,
     start_y: 0,
     end_x: 0,
@@ -25,6 +26,7 @@ export default function () {
   });
   //鼠标按下事件
   const handleMouseDown = (event: MouseEvent) => {
+    positionList.is_show_mask = true
     positionList.start_x = event.clientX;
     positionList.start_y = event.clientY;
     positionList.end_x = event.clientX;
@@ -88,11 +90,13 @@ export default function () {
     positionList.start_y = 0;
     positionList.end_x = 0;
     positionList.end_y = 0;
+    positionList.is_show_mask = false
   }
   // return toRefs(positionList)
   return {
     // ...toRefs(positionList), // 遮罩层 样式
     ...toRefs({
+      positionList,
       mask_width, //分别计算遮罩层的位置，大小
       mask_height, //分别计算遮罩层的位置，大小
       mask_left, //分别计算遮罩层的位置，大小

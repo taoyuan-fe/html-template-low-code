@@ -44,7 +44,7 @@ export default function () {
         padding: 5px;
       }
 
-      .easy {
+      .table-box {
         width: 100%;
         margin: 0;
         border-collapse: collapse;

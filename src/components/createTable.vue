@@ -1,5 +1,5 @@
 <template>
-  <el-form ref="ruleFormRef" :model="form" :rules="rules" label-width="60px">
+  <el-form ref="ruleFormRef" :model="form" :rules="rules" label-width="30px">
     <el-form-item label="行" prop="row">
       <el-input-number v-model="form.row" :min="1" :max="15" />
     </el-form-item>
@@ -8,6 +8,12 @@
     </el-form-item>
     <el-form-item>
       <el-button type="primary" @click="submitForm">生成</el-button>
+    </el-form-item>
+    <el-form-item>
+      <el-button type="primary" @click="merge">合并单元格</el-button>
+    </el-form-item>
+    <el-form-item>
+      <el-button type="primary" @click="exportHtml">导出html</el-button>
     </el-form-item>
   </el-form>
 </template>
@@ -21,7 +27,7 @@ const form = reactive({
   row: 6,
   column: 5,
 });
-const emits = defineEmits(["createTable"]);
+const emits = defineEmits(["createTable", "merge", "exportHtml"]);
 
 const check = (rule: any, value: any, callback: any) => {
   if (!value) {
@@ -51,6 +57,12 @@ const submitForm = async () => {
     }
   });
 };
+const merge = () => {
+  emits("merge");
+}
+const exportHtml = () => {
+  emits("exportHtml");
+}
 </script>
 <style scoped>
 .el-button--text {
