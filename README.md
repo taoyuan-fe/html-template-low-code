@@ -1,6 +1,16 @@
 # Vue 3 + Vite
+基于 Vue3 的table模板生成器
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+## 功能
+- 右键菜单新增行、列
+- 拖动选择合并单元格
+- 自定义 表格内容、行内元素样式
+- 可以导出html
+
+## 未来即将支持
+- 导出 excel
+- 表单内组件选择
+- 富文本
 
 ## Recommended IDE Setup
 
