@@ -93,23 +93,23 @@ const vMouseMenu: any = MouseMenuDirective; // 自定义指令
 const menuOptions = {
   menuList: [
     {
-      label: "左侧插入行",
-      tips: "Edit",
+      label: "左侧插入列",
+      tips: "1列",
       fn: (params: { column: number }) => {
         const index = params.column - 1 < 0 ? 0 : params.column - 1;
         addColumn(index);
       },
     },
     {
-      label: "右侧插入行",
-      tips: "Stop",
+      label: "右侧插入列",
+      tips: "1列",
       fn: (params: { column: number }) => {
         addColumn(params.column + 1);
       },
     },
     {
       label: "上方插入行",
-      tips: "Delete",
+      tips: "1行",
       fn: (params: { row: number }) => {
         const index = params.row - 1 < 0 ? 0 : params.row - 1;
         addRow(index);
@@ -117,7 +117,7 @@ const menuOptions = {
     },
     {
       label: "下方插入行",
-      tips: "Delete",
+      tips: "1行",
       fn: (params: { row: number }) => {
         addRow(params.row + 1);
       },
