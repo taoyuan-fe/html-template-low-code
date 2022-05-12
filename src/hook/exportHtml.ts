@@ -24,8 +24,8 @@ export default function () {
     let template = code;
     template = template.replaceAll(/\<!--(.*?)-->/g, ""); // 去除注释
     template = template.replaceAll(/data-(.*?)=""/g, ""); // 去除 data-数据
-    template = template.replaceAll(/row-active/g, ""); // 去除 data-数据
-    template = template.replaceAll(/table-focus/g, ""); // 去除 data-数据
+    // template = template.replaceAll(/row-active/g, ""); // 去除样式
+    // template = template.replaceAll(/table-focus/g, ""); // 去除样式
     let html = `<!DOCTYPE html>
   <html lang="en">
   <head>
@@ -42,6 +42,13 @@ export default function () {
   
       body {
         padding: 5px;
+      }
+
+      .easy {
+        width: 100%;
+        margin: 0;
+        border-collapse: collapse;
+        border-spacing: 0;
       }
     </style>
   </head>

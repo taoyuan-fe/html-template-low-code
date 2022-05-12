@@ -1,4 +1,5 @@
 <template>
+  <!-- 遮罩层 -->
   <div
     class="mask"
     :style="'width:' + mask_width + 'left:' + mask_left + 'height:' + mask_height + 'top:' + mask_top"
@@ -13,7 +14,7 @@
   </el-aside>
   <el-main class="content-box" @click="clear" @mousedown="handleMouseDown">
     <div class="content">
-      <table ref="table" border="1" cellspacing="0" cellpadding="0">
+      <table ref="table" border="1" cellspacing="0" cellpadding="0" class="easy">
         <!-- 标签用于对表格中的列进行组合，以便对其进行格式化 -->
         <colgroup>
           <col v-for="(item, index) in colgroup" :key="index" :width="item.width" />
@@ -28,9 +29,6 @@
                 :id="subItem.id"
                 v-if="subItem.show"
                 class="table-cell"
-                :class="{
-                  'table-focus': tDOption.id === subItem.id,
-                }"
                 :style="subItem.style"
               >
                 {{ subItem.value }}
@@ -58,6 +56,8 @@ import maskHook from "@/hook/mask";
 // 导出html文件
 import exportHtmlHook from "@/hook/exportHtml";
 
+directives: {
+}
 // 拖拽框架 Hook 解构
 const {
   mask_width, // 拖拽框宽度
@@ -174,18 +174,17 @@ function export2Excel() {
 .content {
   display: flex;
   justify-content: center;
-  table {
-    // z-index: 1;
-    opacity: 0.8;
-  }
 }
-.table-focus {
-  border: 2px solid #f56c6c !important;
+.easy {
+  width: 100%;
+  margin: 0;
+  border-collapse: collapse;
+  border-spacing: 0;
 }
 .mask {
   position: absolute;
-  background: #409EFF;
+  background: #409eff;
   z-index: 1;
-  opacity: 0.1;
+  opacity: 0.4;
 }
 </style>
