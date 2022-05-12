@@ -1,10 +1,10 @@
 <template>
   <el-form ref="ruleFormRef" :model="form" :rules="rules" label-width="60px">
     <el-form-item label="行" prop="row">
-      <el-input-number v-model="form.row" :min="1" :max="20" />
+      <el-input-number v-model="form.row" :min="1" :max="15" />
     </el-form-item>
     <el-form-item label="列" prop="column">
-      <el-input-number v-model="form.column" :min="1" :max="20" />
+      <el-input-number v-model="form.column" :min="1" :max="15" />
     </el-form-item>
     <el-form-item>
       <el-button type="primary" @click="submitForm">生成</el-button>
@@ -44,6 +44,7 @@ const rules = reactive<FormRules>({
 // 校验
 const submitForm = async () => {
   if (!ruleFormRef) return;
+  if (!ruleFormRef.value) return;
   await ruleFormRef.value.validate((valid, fields) => {
     if (valid) {
       emits("createTable", form.row, form.column);

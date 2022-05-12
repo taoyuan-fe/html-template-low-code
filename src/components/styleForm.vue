@@ -1,6 +1,6 @@
 <template>
   <el-form :model="form" label-width="80px">
-    <el-form-item label="表格值">
+    <el-form-item label="单元格内容">
       <el-input v-model="form.value" />
     </el-form-item>
   </el-form>
@@ -28,8 +28,8 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, defineProps, computed } from "vue";
-import { TdOption, TdStyleModule } from "../interface/TdModule"; // 样式表
+import {  defineProps, computed } from "vue";
+import { TdOption } from "@/interface/TdModule"; // 样式表
 
 const props = defineProps({
   tDOption: {

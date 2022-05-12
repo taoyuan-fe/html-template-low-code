@@ -8,6 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@types/prettier": "^2.6.0",
     "element-plus": "^2.1.11",
     "prettier": "^2.6.2",
     "sass": "^1.51.0",
