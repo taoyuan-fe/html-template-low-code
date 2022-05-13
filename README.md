@@ -1,5 +1,14 @@
 # Vue 3 + Vite
 基于 Vue3 的table模板生成器
+####  命令
+
+```sh
+# 开发
+npm run dev
+
+# 构建poolName
+npm run build
+```
 
 ## 功能
 - 右键菜单新增行、列
