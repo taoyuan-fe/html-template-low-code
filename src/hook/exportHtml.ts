@@ -24,6 +24,9 @@ export default function () {
     let template = code;
     template = template.replaceAll(/\<!--(.*?)-->/g, ""); // 去除注释
     template = template.replaceAll(/data-(.*?)=""/g, ""); // 去除 data-数据
+    template = template.replaceAll(/hideSelect/g, ""); // 去除样式
+    template = template.replaceAll(/active/g, ""); // 去除选中样式
+    template = template.replaceAll(/class=""/g, ""); // 去除空的样式
     // template = template.replaceAll(/row-active/g, ""); // 去除样式
     // template = template.replaceAll(/table-focus/g, ""); // 去除样式
     let html = `<!DOCTYPE html>
@@ -45,8 +48,6 @@ export default function () {
       }
 
       .table-box {
-        width: 100%;
-        margin: 0;
         border-collapse: collapse;
         border-spacing: 0;
       }

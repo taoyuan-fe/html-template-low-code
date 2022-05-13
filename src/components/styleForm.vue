@@ -6,11 +6,12 @@
   </el-form>
   <el-form :model="style" label-width="80px" size="small">
     <el-form-item label="宽度">
-      <el-input v-model="style.width" @change="widthChange"/>
+      <!-- <el-input v-model="style.width"/> -->
+      <input-px v-model="style.width"/>
       <div class="describe">这会改变这整列的宽度</div>
     </el-form-item>
     <el-form-item label="高度">
-      <el-input v-model="style.height" @change="heightChange"/>
+      <input-px v-model="style.height"/>
       <div class="describe">这会改变这行的高度</div>
     </el-form-item>
     <el-form-item label="字体方向">
@@ -30,7 +31,7 @@
 <script lang="ts" setup>
 import {  defineProps, computed } from "vue";
 import { TdOption } from "@/interface/TdModule"; // 样式表
-
+import inputPx from './inputPx.vue'
 const props = defineProps({
   tDOption: {
     type: TdOption,
@@ -57,15 +58,6 @@ const form = computed(() => props.tDOption);
 
 const style = computed(() => props.tDOption.style);
 
-// 宽度变化
-const widthChange = (width: Number) => {
-  props.tDOption.width = `${width}px`
-}
-
-// 高度变化
-const heightChange = (height: Number) => {
-  props.tDOption.height = `${height}px`
-}
 
 const onSubmit = () => {
   console.log("submit!");

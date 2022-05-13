@@ -18,7 +18,7 @@
   </el-form>
 </template>
 <script lang="ts" setup>
-import { reactive, ref, computed } from "vue";
+import { reactive, ref } from "vue";
 import type { FormInstance, FormRules } from "element-plus";
 
 const dialogFormVisible = ref(false);

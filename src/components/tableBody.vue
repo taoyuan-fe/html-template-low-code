@@ -8,17 +8,18 @@
   <el-aside class="aside">
     <el-card>
       <template #header> 表单操作 </template>
-      <form-table @createTable="createdTable" @merge="merge" @exportHtml="exportHtml"/>
+      <form-table @createTable="createdTable" @merge="merge" @exportHtml="exportHtml" />
     </el-card>
   </el-aside>
   <el-main class="content-box" @click="clear" @mousedown="handleMouseDown">
     <div class="content">
       <table
         ref="table"
-        border="1"
-        cellspacing="0"
-        cellpadding="0"
         class="table-box"
+        :cellspacing="0"
+        :cellpadding="0"
+        :border="1"
+        style="border-collapse: collapse"
         :class="{ hideSelect: positionList.is_show_mask }"
       >
         <!-- 标签用于对表格中的列进行组合，以便对其进行格式化 -->
@@ -29,6 +30,7 @@
           <tr v-for="(item, index) in tableData" :key="index">
             <template v-for="(subItem, subIndex) in item" :key="subIndex">
               <td
+                v-if="subItem.show"
                 @click.stop="chooseTd(subItem)"
                 v-mouse-menu="{
                   params: { row: index, column: subIndex },
@@ -37,9 +39,8 @@
                 :colspan="subItem.colSpan"
                 :rowspan="subItem.rowSpan"
                 :id="subItem.id"
-                v-if="subItem.show"
-                class="table-cell"
                 :style="subItem.style"
+                :class="{active: tDOption.id === subItem.id }"
               >
                 {{ subItem.value }}
               </td>
@@ -268,15 +269,16 @@ const addColumn = (index: number) => {
   justify-content: center;
 }
 .table-box {
-  width: 100%;
-  margin: 0;
-  border-collapse: collapse;
-  border-spacing: 0;
   z-index: 1;
   opacity: 0.8;
+  border-collapse: collapse;
+  border-spacing: 0;
 }
 .mask {
   position: absolute;
-  background: #409eff;
+  background: rgb(64, 158, 255, 0.7);
+}
+.active {
+  background: rgb(64, 158, 255, 0.7) !important;
 }
 </style>

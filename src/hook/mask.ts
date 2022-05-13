@@ -46,6 +46,7 @@ export default function () {
     handleDomSelect();
     // resSetXY();
   }
+  // 选中dom中的值
   function handleDomSelect() {
     const dom_mask = window.document.querySelector(".mask");
     if (!dom_mask) {
@@ -53,15 +54,21 @@ export default function () {
     }
     //getClientRects()每一个盒子的边界矩形的矩形集合
     const rect_select: DOMRect = dom_mask.getClientRects()[0];
-    const add_list = new Array<DomItem>();
-    document.querySelectorAll(".table-cell").forEach((node, index) => {
+    const dom_list = new Array<DomItem>();
+    document.querySelectorAll(".table-box td").forEach((node, index) => {
       const rects: DOMRect = node.getClientRects()[0];
       if (collide(rects, rect_select) === true) {
-        add_list.push(new DomItem(rects, node.id));
+        dom_list.push(new DomItem(rects, node.id));
       }
     });
-    selectDomList.value = add_list;
-    resetMask();
+    selectDomList.value = dom_list;
+    // 如果当前选中的 td 节点长度没有两个就不需要遮罩层显示了
+    // 也是为了点击之后修改单元格长度、高度的时候，遮罩层出现覆盖不完整的情况
+    if(selectDomList.value.length > 1){
+      resetMask();
+    }else{
+      resSetXY()
+    }
   }
   //比较checkbox盒子边界和遮罩层边界最大最小值
   function collide(rect1: DOMRect, rect2: DOMRect) {
