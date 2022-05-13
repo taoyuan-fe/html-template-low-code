@@ -9,11 +9,14 @@
   },
   "dependencies": {
     "@howdyjs/mouse-menu": "^2.0.5",
+    "@types/file-saver": "^2.0.5",
     "@types/prettier": "^2.6.0",
     "element-plus": "^2.1.11",
+    "file-saver": "^2.0.5",
     "prettier": "^2.6.2",
     "sass": "^1.51.0",
-    "vue": "^3.2.25"
+    "vue": "^3.2.25",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^2.3.1",

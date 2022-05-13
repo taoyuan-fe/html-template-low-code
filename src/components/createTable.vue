@@ -1,33 +1,47 @@
 <template>
-  <el-form ref="ruleFormRef" :model="form" :rules="rules" label-width="30px">
+  <el-form ref="ruleFormRef" :model="form" :rules="rules" label-width="80px" size="small" label-suffix="：">
     <el-form-item label="行" prop="row">
       <el-input-number v-model="form.row" :min="1" :max="15" />
     </el-form-item>
     <el-form-item label="列" prop="column">
       <el-input-number v-model="form.column" :min="1" :max="15" />
     </el-form-item>
-    <el-form-item>
-      <el-button type="primary" @click="submitForm">生成</el-button>
+    <el-form-item label="操作">
+      <el-tooltip effect="light" content="生成表格" placement="top">
+        <el-button type="primary" @click="submitForm" plain :icon="Edit" circle alt="1111"></el-button>
+      </el-tooltip>
+      <el-tooltip effect="light" content="合并单元格" placement="top">
+        <el-button type="primary" @click="merge" plain :icon="Expand" circle></el-button>
+      </el-tooltip>
+      <el-tooltip effect="light" content="导出html文件" placement="top">
+        <el-button type="primary" @click="exportFile('html')" plain :icon="Notebook" circle></el-button>
+      </el-tooltip>
+      <el-tooltip effect="light" content="导出excel文件" placement="top">
+        <el-button type="primary" @click="exportFile('xlsx')" plain :icon="Film" circle></el-button>
+      </el-tooltip>
     </el-form-item>
-    <el-form-item>
-      <el-button type="primary" @click="merge">合并单元格</el-button>
-    </el-form-item>
-    <el-form-item>
-      <el-button type="primary" @click="exportHtml">导出html</el-button>
-    </el-form-item>
+    <!-- 测试一下导入 -->
+    <input type="file" ref="upload" accept=".html" class="file" @change="importf"/>
   </el-form>
 </template>
 <script lang="ts" setup>
 import { reactive, ref } from "vue";
 import type { FormInstance, FormRules } from "element-plus";
+import { Film, Edit, Notebook, Expand, UploadFilled } from "@element-plus/icons-vue";
 
-const dialogFormVisible = ref(false);
+// Hook 导出excel文件
+import importHtml from "@/hook/importHtml";
+import { UploadFile, UploadFiles } from "element-plus/lib/components/upload";
+
+const { importf } = importHtml();
+
+
 const ruleFormRef = ref<FormInstance>(); // 组件校验项
 const form = reactive({
   row: 6,
   column: 5,
 });
-const emits = defineEmits(["createTable", "merge", "exportHtml"]);
+const emits = defineEmits(["createTable", "merge", "exportFile"]); // 触发父组件事件
 
 const check = (rule: any, value: any, callback: any) => {
   if (!value) {
@@ -59,9 +73,15 @@ const submitForm = async () => {
 };
 const merge = () => {
   emits("merge");
-}
-const exportHtml = () => {
-  emits("exportHtml");
+};
+const exportFile = (type: string) => {
+  emits("exportFile", type);
+};
+const onSuccess = (response: any, uploadFile: UploadFile, uploadFiles: UploadFiles) => {
+  console.log(response)
+  if(uploadFile.raw){
+    importf(uploadFile.raw)
+  }
 }
 </script>
 <style scoped>

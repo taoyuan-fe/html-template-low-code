@@ -8,7 +8,7 @@
   <el-aside class="aside">
     <el-card>
       <template #header> 表单操作 </template>
-      <form-table @createTable="createdTable" @merge="merge" @exportHtml="exportHtml" />
+      <form-table @createTable="createdTable" @merge="merge" @exportFile="exportFile" />
     </el-card>
   </el-aside>
   <el-main class="content-box" @click="clear" @mousedown="handleMouseDown">
@@ -39,10 +39,15 @@
                 :colspan="subItem.colSpan"
                 :rowspan="subItem.rowSpan"
                 :id="subItem.id"
-                :style="subItem.style"
-                :class="{active: tDOption.id === subItem.id }"
               >
-                {{ subItem.value }}
+                <div
+                  :contenteditable="true"
+                  @input="changeValue(subItem, $event)"
+                  :style="subItem.style"
+                  :class="{ active: tDOption.id === subItem.id }"
+                >
+                  {{ subItem.value }}
+                </div>
               </td>
             </template>
           </tr>
@@ -66,6 +71,8 @@ import { TdOption, ColgroupModule } from "@/interface/TdModule"; // 样式表
 import maskHook from "@/hook/mask";
 // Hook 导出html文件
 import exportHtmlHook from "@/hook/exportHtml";
+// Hook 导出excel文件
+import tableToExcel from "@/hook/tableToExcel";
 // 鼠标右键菜单行为
 import { MouseMenuDirective } from "@howdyjs/mouse-menu";
 
@@ -82,6 +89,8 @@ const {
 } = maskHook();
 // 导出html文件hook
 const { getHtml } = exportHtmlHook();
+// 导出excel文件hook
+const { exportExcel } = tableToExcel();
 
 const tableData = ref<TdOption[][]>([]); // 表格数据
 const colgroup = ref<ColgroupModule[]>([]); // 标签用于对表格中的列进行组合
@@ -192,13 +201,20 @@ const merge = () => {
   // 合并单元格
   resSetXY();
 };
-
-// 导出html
-const exportHtml = () => {
+// 导出文件事件
+const exportFile = (type: string) => {
   if (!table!.value) {
     return;
   }
-  let template = table.value.outerHTML;
+  if (type === "html") {
+    exportHtml(table.value);
+  } else if (type === "xlsx") {
+    exportExcel(table.value);
+  }
+};
+// 导出html
+const exportHtml = (table: any) => {
+  let template = table.outerHTML;
   const a = document.createElement("a");
   const url = window.URL.createObjectURL(
     new Blob([getHtml(template)], {
@@ -245,6 +261,13 @@ const addColumn = (index: number) => {
   // 重置一下选中项
   resSetXY();
 };
+// 表格内切换数据
+const changeValue = (subItem: TdOption, event: Event) => {
+  if (!event.target) {
+    return;
+  }
+  subItem.value = (event.target as HTMLDivElement).innerText;
+};
 </script>
 
 <style lang="scss" scoped>
@@ -279,6 +302,6 @@ const addColumn = (index: number) => {
   background: rgb(64, 158, 255, 0.7);
 }
 .active {
-  background: rgb(64, 158, 255, 0.7) !important;
+  background: #dcdbdb !important;
 }
 </style>

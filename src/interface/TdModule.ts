@@ -1,11 +1,12 @@
 // 每一个单元格的样式
-export class TdStyleModule {
+export class TdStyleModule  {
   textAlign = "center" as "center"; // 字体方向
   color: string = "rgba(0, 0, 0, 1)"; // 字体颜色
   fontSize: string = "16px";
   backgroundColor: string = "rgba(255, 255, 255, 1)";
   width: string = "150px";
   height: string = "40px";
+  fontWeight  = 'normal' as "normal";
 }
 
 export class TdOption extends TdStyleModule {

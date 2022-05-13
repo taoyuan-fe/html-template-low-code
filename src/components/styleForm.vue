@@ -1,7 +1,13 @@
 <template>
-  <el-form :model="form" label-width="90px">
+  <el-form :model="form" label-width="80px" size="small">
     <el-form-item label="单元格内容">
-      <el-input v-model="form.value" />
+      <el-input
+        v-model="form.value"
+        maxlength="40"
+        placeholder="Please input"
+        show-word-limit
+        type="textarea"
+      />
     </el-form-item>
   </el-form>
   <el-form :model="style" label-width="80px" size="small">
@@ -16,7 +22,12 @@
     </el-form-item>
     <el-form-item label="字体方向">
       <el-select v-model="style.textAlign" placeholder="Select">
-        <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
+        <el-option v-for="item in optionsAlign" :key="item.value" :label="item.label" :value="item.value" />
+      </el-select>
+    </el-form-item>
+    <el-form-item label="字体粗细">
+      <el-select v-model="style.fontWeight" placeholder="Select">
+        <el-option v-for="item in optionsFontWeight" :key="item.value" :label="item.label" :value="item.value" />
       </el-select>
     </el-form-item>
     <el-form-item label="字体颜色">
@@ -39,7 +50,7 @@ const props = defineProps({
   },
 });
 
-const options = [
+const optionsAlign = [
   {
     value: "center",
     label: "居中",
@@ -53,6 +64,20 @@ const options = [
     label: "靠右",
   },
 ];
+const optionsFontWeight = [
+  {
+    value: "normal",
+    label: "标准",
+  },
+  {
+    value: "bold",
+    label: "加粗",
+  },
+  {
+    value: "lighter",
+    label: "变细",
+  },
+]
 
 const form = computed(() => props.tDOption);
 
