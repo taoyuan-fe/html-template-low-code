@@ -8,7 +8,7 @@
     </el-form-item>
     <el-form-item label="操作">
       <el-tooltip effect="light" content="生成表格" placement="top">
-        <el-button type="primary" @click="submitForm" plain :icon="Edit" circle alt="1111"></el-button>
+        <el-button type="primary" @click="submitForm" plain :icon="Edit" circle></el-button>
       </el-tooltip>
       <el-tooltip effect="light" content="合并单元格" placement="top">
         <el-button type="primary" @click="merge" plain :icon="Expand" circle></el-button>
@@ -20,20 +20,13 @@
         <el-button type="primary" @click="exportFile('xlsx')" plain :icon="Film" circle></el-button>
       </el-tooltip>
     </el-form-item>
-    <!-- 测试一下导入 -->
-    <input type="file" ref="upload" accept=".html" class="file" @change="importf"/>
   </el-form>
 </template>
 <script lang="ts" setup>
 import { reactive, ref } from "vue";
 import type { FormInstance, FormRules } from "element-plus";
-import { Film, Edit, Notebook, Expand, UploadFilled } from "@element-plus/icons-vue";
+import { Film, Edit, Notebook, Expand } from "@element-plus/icons-vue";
 
-// Hook 导出excel文件
-import importHtml from "@/hook/importHtml";
-import { UploadFile, UploadFiles } from "element-plus/lib/components/upload";
-
-const { importf } = importHtml();
 
 
 const ruleFormRef = ref<FormInstance>(); // 组件校验项
@@ -41,7 +34,7 @@ const form = reactive({
   row: 6,
   column: 5,
 });
-const emits = defineEmits(["createTable", "merge", "exportFile"]); // 触发父组件事件
+const emits = defineEmits(["createTable", "merge", "exportFile", "transform"]); // 触发父组件事件
 
 const check = (rule: any, value: any, callback: any) => {
   if (!value) {
@@ -77,12 +70,7 @@ const merge = () => {
 const exportFile = (type: string) => {
   emits("exportFile", type);
 };
-const onSuccess = (response: any, uploadFile: UploadFile, uploadFiles: UploadFiles) => {
-  console.log(response)
-  if(uploadFile.raw){
-    importf(uploadFile.raw)
-  }
-}
+
 </script>
 <style scoped>
 .el-button--text {

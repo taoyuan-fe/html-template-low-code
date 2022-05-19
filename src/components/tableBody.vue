@@ -10,6 +10,10 @@
       <template #header> 表单操作 </template>
       <form-table @createTable="createdTable" @merge="merge" @exportFile="exportFile" />
     </el-card>
+    <el-card>
+      <template #header> 导入文件 </template>
+      <upload-html @transformTable="transformTable" />
+    </el-card>
   </el-aside>
   <el-main class="content-box" @click="clear" @mousedown="handleMouseDown">
     <div class="content">
@@ -22,13 +26,12 @@
         style="border-collapse: collapse"
         :class="{ hideSelect: positionList.is_show_mask }"
       >
-        <!-- 标签用于对表格中的列进行组合，以便对其进行格式化 -->
-        <colgroup>
-          <col v-for="(item, index) in colgroup" :key="index" :width="item.width" />
-        </colgroup>
         <tbody>
           <tr v-for="(item, index) in tableData" :key="index">
             <template v-for="(subItem, subIndex) in item" :key="subIndex">
+              <!-- 点击可以直接输入 -->
+              <!-- @input="changeValue(subItem, $event)"
+                :contenteditable="true" -->
               <td
                 v-if="subItem.show"
                 @click.stop="chooseTd(subItem)"
@@ -39,16 +42,10 @@
                 :colspan="subItem.colSpan"
                 :rowspan="subItem.rowSpan"
                 :id="subItem.id"
-              >
-                <div
-                  :contenteditable="true"
-                  @input="changeValue(subItem, $event)"
-                  :style="subItem.style"
-                  :class="{ active: tDOption.id === subItem.id }"
-                >
-                  {{ subItem.value }}
-                </div>
-              </td>
+                :style="subItem.style"
+                :class="{ active: tDOption.id === subItem.id }"
+                v-html="subItem.value"
+              ></td>
             </template>
           </tr>
         </tbody>
@@ -62,10 +59,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, nextTick, getCurrentInstance } from "vue";
 import FormTable from "./createTable.vue"; // 生成表单form表单
+import uploadHtml from "./uploadHtml.vue"; // 导入html 并且重新生成
 import StyleForm from "./styleForm.vue"; // 样式修改
-import { TdOption, ColgroupModule } from "@/interface/TdModule"; // 样式表
+import { TdOption } from "@/interface/TdModule"; // 样式表
 
 // hook 拖拽框
 import maskHook from "@/hook/mask";
@@ -83,8 +81,9 @@ const {
   mask_height, // 拖拽框高度
   mask_left, // 拖拽框左边
   mask_top, // 拖拽框顶部
-  handleMouseDown, // 鼠标单击后事件
   selectDomList, // 拖拽框选中的dom
+  selectDomMap, // 拖拽框选中的map
+  handleMouseDown, // 鼠标单击后事件
   resSetXY, // 清除
 } = maskHook();
 // 导出html文件hook
@@ -93,13 +92,13 @@ const { getHtml } = exportHtmlHook();
 const { exportExcel } = tableToExcel();
 
 const tableData = ref<TdOption[][]>([]); // 表格数据
-const colgroup = ref<ColgroupModule[]>([]); // 标签用于对表格中的列进行组合
 
 const tDOption = ref<TdOption>(new TdOption()); // 当前选中的表单样式-和属性
 const table = ref<any>(null); // table的Ref
 
 const vMouseMenu: any = MouseMenuDirective; // 自定义指令
 
+// 右键菜单
 const menuOptions = {
   menuList: [
     {
@@ -140,6 +139,7 @@ const menuOptions = {
 };
 
 onMounted(() => {
+  console.log(getCurrentInstance());
   createdTable(6, 5);
 });
 
@@ -151,21 +151,25 @@ const clear = () => {
 const createdTable = (row: number, column: number) => {
   clear();
   if (!row && !column) {
-    colgroup.value = [];
     tableData.value = [];
     return;
   }
-  colgroup.value = Array(column).fill({ width: "150px" });
   tableData.value = Array(row)
     .fill(0)
     .map((item, index) => {
       const res = [];
       // 列的标志
       for (let columnIndex = 0; columnIndex < column; columnIndex++) {
-        res.push(new TdOption(index, columnIndex));
+        res.push(new TdOption(`${index}-${columnIndex}`));
       }
       return res;
     });
+};
+// 转换新表格
+const transformTable = (arr: TdOption[][]) => {
+  tableData.value = arr;
+  // const { ctx } = getCurrentInstance();
+  // ctx.$forceUpdate();
 };
 // 选择tab
 const chooseTd = (subItem: TdOption) => {
@@ -177,29 +181,54 @@ const merge = () => {
   if (selectDomList.value.length < 2) {
     return;
   }
-  const start = selectDomList.value[0]; // 开始节点
-  const end = selectDomList.value[selectDomList.value.length - 1]; // 结束节点
-  // const [start, end] = keyList.value;
-  // 首先合并行
-  for (let i = start.row; i <= end.row; i++) {
-    let value = tableData.value[i][start.column];
-    value.colSpan = end.column + 1 - start.column;
-    for (let k = start.column + 1; k <= end.column; k++) {
-      tableData.value[i][k].show = false;
-    }
+  // const start = selectDomList.value[0]; // 开始节点
+
+  // let value = tableData.value[start.row][start.column];
+  let targetNode = {
+    id: `${selectDomList.value[0].row}-${selectDomList.value[0].column}`,
+    row: -1,
+    column: -1
   }
-  // 合并列
-  // 首先遍历列 - 取出需要进行合并的第一项数据
-  for (let i = start.column; i <= end.column; i++) {
-    // 取出需要进行合并的列
-    let value = tableData.value[start.row][i];
-    value.rowSpan = end.row + 1 - start.row;
-    for (let j = start.row + 1; j <= end.row; j++) {
-      tableData.value[j][start.column].show = false;
-    }
+  let value: TdOption = new TdOption();
+  selectDomMap.value.delete(targetNode.id) // 从合并的表格中删除掉我们用来合并的节点防止重复
+  // 不仅要转换表格的合并值
+  // 首先合并行
+  // 从起始行开始 合并每一个单元行
+  for (let i = 0; i < tableData.value.length; i++) {
+    tableData.value[i] = tableData.value[i].filter((subItem, subIndex) => {
+      const { id, style: {width, height}, colSpan, rowSpan } = subItem
+      // 如果当前节点就是我们要进行合并的第一个节点
+      // 就将这个节点取出来进行合并操作
+      if(targetNode.id === id){
+        value = subItem
+        targetNode.row = i
+        targetNode.column = subIndex
+      }
+      // 如果是初始节点就不进行操作了
+      if (selectDomMap.value.has(id)) {
+        // 已经被合并的就不加上去了
+        // 还需要转换合并后的宽度
+        if (i == targetNode.row) {
+          value.style.width = getValue(value.style.width, width);
+          value.colSpan +=  colSpan;
+        }
+        if (subIndex == targetNode.column) {
+          value.style.height = getValue(value.style.height,height);
+          value.rowSpan +=  rowSpan;
+        }
+      }else{
+        return subItem
+      }
+    })
   }
   // 合并单元格
   resSetXY();
+};
+// 转换合并之后的宽度和长度
+const getValue = (addend1: string, addend2: string) => {
+  const value1 = addend1.replace("px", "");
+  const value2 = addend2.replace("px", "");
+  return `${Number(value1) + Number(value2)}px`;
 };
 // 导出文件事件
 const exportFile = (type: string) => {
@@ -232,7 +261,7 @@ const addRow = (index: number) => {
   const columnLength = tableData.value[0].length;
   const res = [];
   for (let columnIndex = 0; columnIndex < columnLength; columnIndex++) {
-    res.push(new TdOption(index, columnIndex));
+    res.push(new TdOption(`${index}-${columnIndex}`));
   }
   tableData.value.splice(index, 0, res);
   // 插入完毕之后
@@ -241,7 +270,7 @@ const addRow = (index: number) => {
   const rowLength = tableData.value.length;
   for (let rowIndex = index + 1; rowIndex < rowLength; rowIndex++) {
     tableData.value[rowIndex].forEach((column, columnIndex) => {
-      column.resetId(rowIndex, columnIndex);
+      column.resetId(`${rowIndex}-${columnIndex}`);
     });
   }
 };
@@ -251,11 +280,11 @@ const addColumn = (index: number) => {
   const rowLength = tableData.value.length;
   for (let rowIndex = 0; rowIndex < rowLength; rowIndex++) {
     // 先进性添加
-    tableData.value[rowIndex].splice(index, 0, new TdOption(rowIndex, index));
+    tableData.value[rowIndex].splice(index, 0, new TdOption(`${rowIndex}-${index}`));
     const columnLength = tableData.value[0].length;
     // 然后对之后的内容进行修改
     for (let columnIndex = index + 1; columnIndex < columnLength; columnIndex++) {
-      tableData.value[rowIndex][columnIndex].resetId(rowIndex, columnIndex);
+      tableData.value[rowIndex][columnIndex].resetId(`${rowIndex}-${columnIndex}`);
     }
   }
   // 重置一下选中项
@@ -302,6 +331,7 @@ const changeValue = (subItem: TdOption, event: Event) => {
   background: rgb(64, 158, 255, 0.7);
 }
 .active {
-  background: #dcdbdb !important;
+  // background: rgb(220, 219, 219, 0.4) !important;
+  border: 1px solid red !important;
 }
 </style>

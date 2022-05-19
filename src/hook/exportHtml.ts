@@ -4,7 +4,6 @@ import parserHtml from "prettier/parser-html";
 export default function () {
   // 格式化代码
   const prettierCode = (code: string) => {
-    console.log(code)
     try {
       // 参数1：代码字符串，参数2：格式化配置
       return prettier.format(code, {
@@ -23,7 +22,8 @@ export default function () {
 
   const getHtml = (code: string) => {
     let template = code;
-    template = template.replaceAll(/\<!--(.*?)-->/g, ""); // 去除注释
+    // template = template.replaceAll(/\<!--(.*?)-->/g, ""); // 去除注释
+    template = template.replaceAll(/<!--[\w\W\r\n]*?-->/gmi, ""); // 去除注释
     template = template.replaceAll(/data-(.*?)=""/g, ""); // 去除 data-数据
     template = template.replaceAll(/hideSelect/g, ""); // 去除样式
     template = template.replaceAll(/active/g, ""); // 去除选中样式
