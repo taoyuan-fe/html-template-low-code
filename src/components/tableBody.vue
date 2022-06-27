@@ -45,7 +45,8 @@
                 :style="subItem.style"
                 :class="{ active: tDOption.id === subItem.id }"
                 v-html="subItem.value"
-              ></td>
+              >
+              </td>
             </template>
           </tr>
         </tbody>
@@ -139,7 +140,6 @@ const menuOptions = {
 };
 
 onMounted(() => {
-  console.log(getCurrentInstance());
   createdTable(6, 5);
 });
 
@@ -157,10 +157,10 @@ const createdTable = (row: number, column: number) => {
   tableData.value = Array(row)
     .fill(0)
     .map((item, index) => {
-      const res = [];
+      const res: TdOption[] = [];
       // 列的标志
       for (let columnIndex = 0; columnIndex < column; columnIndex++) {
-        res.push(new TdOption(`${index}-${columnIndex}`));
+        res.push(new TdOption(index, columnIndex));
       }
       return res;
     });
@@ -184,42 +184,50 @@ const merge = () => {
   // const start = selectDomList.value[0]; // 开始节点
 
   // let value = tableData.value[start.row][start.column];
+  const { row, column } = selectDomList.value[0];
   let targetNode = {
-    id: `${selectDomList.value[0].row}-${selectDomList.value[0].column}`,
-    row: -1,
-    column: -1
-  }
+    id: `${row}-${column}`,
+    row,
+    column,
+  };
   let value: TdOption = new TdOption();
-  selectDomMap.value.delete(targetNode.id) // 从合并的表格中删除掉我们用来合并的节点防止重复
+  selectDomMap.value.delete(targetNode.id); // 从合并的表格中删除掉我们用来合并的节点防止重复
   // 不仅要转换表格的合并值
   // 首先合并行
   // 从起始行开始 合并每一个单元行
   for (let i = 0; i < tableData.value.length; i++) {
     tableData.value[i] = tableData.value[i].filter((subItem, subIndex) => {
-      const { id, style: {width, height}, colSpan, rowSpan } = subItem
+      const {
+        id,
+        style: { width, height },
+        colSpan,
+        rowSpan,
+        row,
+        column
+      } = subItem;
       // 如果当前节点就是我们要进行合并的第一个节点
       // 就将这个节点取出来进行合并操作
-      if(targetNode.id === id){
-        value = subItem
-        targetNode.row = i
-        targetNode.column = subIndex
+      if (targetNode.id === id) {
+        value = subItem;
       }
       // 如果是初始节点就不进行操作了
       if (selectDomMap.value.has(id)) {
         // 已经被合并的就不加上去了
         // 还需要转换合并后的宽度
-        if (i == targetNode.row) {
+        // 同行合并宽度
+        if (row == targetNode.row) {
           value.style.width = getValue(value.style.width, width);
-          value.colSpan +=  colSpan;
+          value.colSpan += colSpan;
         }
-        if (subIndex == targetNode.column) {
-          value.style.height = getValue(value.style.height,height);
-          value.rowSpan +=  rowSpan;
+        // 同列合并高度
+        if (column == targetNode.column) {
+          value.style.height = getValue(value.style.height, height);
+          value.rowSpan += rowSpan;
         }
-      }else{
-        return subItem
+      } else {
+        return subItem;
       }
-    })
+    });
   }
   // 合并单元格
   resSetXY();
@@ -261,7 +269,7 @@ const addRow = (index: number) => {
   const columnLength = tableData.value[0].length;
   const res = [];
   for (let columnIndex = 0; columnIndex < columnLength; columnIndex++) {
-    res.push(new TdOption(`${index}-${columnIndex}`));
+    res.push(new TdOption(index, columnIndex));
   }
   tableData.value.splice(index, 0, res);
   // 插入完毕之后
@@ -270,7 +278,7 @@ const addRow = (index: number) => {
   const rowLength = tableData.value.length;
   for (let rowIndex = index + 1; rowIndex < rowLength; rowIndex++) {
     tableData.value[rowIndex].forEach((column, columnIndex) => {
-      column.resetId(`${rowIndex}-${columnIndex}`);
+      column.resetId(rowIndex,columnIndex);
     });
   }
 };
@@ -280,11 +288,11 @@ const addColumn = (index: number) => {
   const rowLength = tableData.value.length;
   for (let rowIndex = 0; rowIndex < rowLength; rowIndex++) {
     // 先进性添加
-    tableData.value[rowIndex].splice(index, 0, new TdOption(`${rowIndex}-${index}`));
+    tableData.value[rowIndex].splice(index, 0, new TdOption(rowIndex,index));
     const columnLength = tableData.value[0].length;
     // 然后对之后的内容进行修改
     for (let columnIndex = index + 1; columnIndex < columnLength; columnIndex++) {
-      tableData.value[rowIndex][columnIndex].resetId(`${rowIndex}-${columnIndex}`);
+      tableData.value[rowIndex][columnIndex].resetId(rowIndex,columnIndex);
     }
   }
   // 重置一下选中项
