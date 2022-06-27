@@ -1,13 +1,3 @@
-// 每一个单元格的样式
-export class TdStyleModule  {
-  'text-align' = "center" as "center"; // 字体方向
-  color: string = "rgba(0, 0, 0, 1)"; // 字体颜色
-  'font-size': string = "16px";
-  'background-color': string = "rgba(255, 255, 255, 1)";
-  width: string = "150px";
-  height: string = "40px";
-  'font-weight'  = 'normal' as "normal";
-}
 
 export class TdOption {
   colSpan = 1;
@@ -16,8 +6,16 @@ export class TdOption {
   value: boolean | number | string = "";
   id: string | undefined = undefined;
   row:  number | undefined = undefined;
-  column:  number | undefined = undefined;
-  style: TdStyleModule = new TdStyleModule();
+  column:  number | undefined = undefined; // 每一个单元格的样式
+  style = {
+    textAlign: "center" as "center", // 字体方向
+    color: "rgba(0, 0, 0, 1)", // 字体颜色
+    fontSize: "16px",
+    backgroundColor: "rgba(255, 255, 255, 1)",
+    width: "150px",
+    height: "40px",
+    fontWeight: "normal" as "normal",
+  };
   constructor(row?:number, column?: number) {
     if(!isNull(row)){
       this.row = row
@@ -35,10 +33,10 @@ export class TdOption {
     this.column = column
     this.id = `${row}-${column}`;
   }
-  setRawAttrs(rawAttrs: { colspan: number, rowspan: number, id: string}) {
-    this.colSpan = rawAttrs.colspan
-    this.rowSpan = rawAttrs.rowspan
-    this.id = rawAttrs.id
+  setRawAttrs(rawAttrs: { colspan: number; rowspan: number; id: string }) {
+    this.colSpan = rawAttrs.colspan;
+    this.rowSpan = rawAttrs.rowspan;
+    this.id = rawAttrs.id;
   }
 }
 

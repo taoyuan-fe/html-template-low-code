@@ -2,7 +2,7 @@
  <el-input-number v-model="num" :step="1" step-strictly />
 </template>
 <script lang="ts" setup>
-import { computed, defineProps } from 'vue'
+import { computed } from 'vue'
 
 const props = defineProps({
   modelValue: {
