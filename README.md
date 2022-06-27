@@ -10,8 +10,7 @@ npm run build
 ```
 
 ## 组件使用
-- file-saver（excel导出）
-- xlsx（excel导出）
+- file-saver、xlsx（excel导出）
 - prettier（格式化html导出）
 - @howdyjs/mouse-menu（右键）
 
@@ -21,7 +20,7 @@ npm run build
 - 自定义 表格内容、行内元素样式
 - 可以导出html
 - 导出 excel
-
+- 可以再次导入 html 重新进行编辑
 ## 未来即将支持
 - 表单内组件选择
 - 富文本
